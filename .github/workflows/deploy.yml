@@ -1,0 +1,82 @@
+name: Deploy Identity Services
+
+on:
+  push:
+    branches:
+      - release
+
+env:
+  AWS_REGION: ap-southeast-1
+  SAM_ARTIFACTS_BUCKET: school-sam-artifacts-test
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [student-identity, teacher-identity, admin-identity]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: services/${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: services/${{ matrix.service }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: services/${{ matrix.service }}
+        run: npm test
+
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    needs: test   # only runs if all tests pass
+    permissions:
+      id-token: write   # required for OIDC auth
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Authenticate to AWS via OIDC (no long-lived keys stored in GitHub)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/DevRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build all services
+        run: |
+          for service in student-identity teacher-identity admin-identity; do
+            echo "Building $service..."
+            cd services/$service
+            npm ci
+            npm run build
+            cd ../..
+          done
+
+      - name: SAM build
+        run: sam build -t infrastructure/template.yaml
+
+      - name: SAM deploy (test environment)
+        run: |
+          sam deploy \
+            --config-file infrastructure/samconfig.toml \
+            --config-env test \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              "DBHost=${{ secrets.TEST_DB_HOST }}" \
+              "DBName=${{ secrets.TEST_DB_NAME }}" \
+              "DBUser=${{ secrets.TEST_DB_USER }}" \
+              "DBPassword=${{ secrets.TEST_DB_PASSWORD }}"

@@ -1,0 +1,7 @@
+{
+  "httpMethod": "POST",
+  "path": "/students",
+  "headers": { "Content-Type": "application/json" },
+  "body": "{\"cognitoSub\":\"test-sub-123\",\"firstName\":\"Maria\",\"lastName\":\"Santos\",\"email\":\"maria2@school.edu\",\"enrollmentYear\":2024}",
+  "isBase64Encoded": false
+}

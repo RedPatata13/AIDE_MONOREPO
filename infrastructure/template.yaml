@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: School Management — Identity Services
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        EVENT_BUS_NAME: !Ref IdentityEventBus
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+        COGNITO_CLIENT_ID: !Ref CognitoClientId
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, prod]
+
+  # --- Student DB ---
+  StudentDBHost:
+    Type: String
+  StudentDBPort:
+    Type: String
+    Default: "5432"
+  StudentDBName:
+    Type: String
+  StudentDBUser:
+    Type: String
+  StudentDBPassword:
+    Type: String
+    NoEcho: true
+
+  # --- Teacher DB ---
+  TeacherDBHost:
+    Type: String
+  TeacherDBPort:
+    Type: String
+    Default: "5432"
+  TeacherDBName:
+    Type: String
+  TeacherDBUser:
+    Type: String
+  TeacherDBPassword:
+    Type: String
+    NoEcho: true
+
+  # --- Admin DB ---
+  AdminDBHost:
+    Type: String
+  AdminDBPort:
+    Type: String
+    Default: "5432"
+  AdminDBName:
+    Type: String
+  AdminDBUser:
+    Type: String
+  AdminDBPassword:
+    Type: String
+    NoEcho: true
+
+  # --- Cognito ---
+  CognitoUserPoolId:
+    Type: String
+  CognitoClientId:
+    Type: String
+
+Resources:
+  IdentityEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub school-identity-${Environment}
+
+  IdentityApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+
+  # --- Student ---
+  StudentIdentityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: student-identity:latest
+      ImageConfig:
+        Command: ["app.handler"]
+      Environment:
+        Variables:
+          DB_HOST: !Ref StudentDBHost
+          DB_PORT: !Ref StudentDBPort
+          DB_NAME: !Ref StudentDBName
+          DB_USER: !Ref StudentDBUser
+          DB_PASSWORD: !Ref StudentDBPassword
+      Events:
+        StudentsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /students/{proxy+}
+            Method: ANY
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref IdentityEventBus
+    Metadata:
+      DockerTag: student-identity
+      DockerContext: ../services/student-identity
+      Dockerfile: Dockerfile
+
+  StudentCreatedListenerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: student-identity:latest
+      ImageConfig:
+        Command: ["handlers/listeners/studentCreated.handler"]
+      Environment:
+        Variables:
+          DB_HOST: !Ref StudentDBHost
+          DB_PORT: !Ref StudentDBPort
+          DB_NAME: !Ref StudentDBName
+          DB_USER: !Ref StudentDBUser
+          DB_PASSWORD: !Ref StudentDBPassword
+      Events:
+        StudentCreatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref IdentityEventBus
+            Pattern:
+              source:
+                - school.identity.student
+              detail-type:
+                - student.created
+    Metadata:
+      DockerTag: student-identity
+      DockerContext: ../services/student-identity
+      Dockerfile: Dockerfile
+
+  # --- Teacher ---
+  TeacherIdentityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: teacher-identity:latest
+      ImageConfig:
+        Command: ["handlers/index.handler"]
+      Environment:
+        Variables:
+          DB_HOST: !Ref TeacherDBHost
+          DB_PORT: !Ref TeacherDBPort
+          DB_NAME: !Ref TeacherDBName
+          DB_USER: !Ref TeacherDBUser
+          DB_PASSWORD: !Ref TeacherDBPassword
+      Events:
+        TeachersApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /teachers/{proxy+}
+            Method: ANY
+
+  # --- Admin ---
+  AdminIdentityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: admin-identity:latest
+      ImageConfig:
+        Command: ["handlers/index.handler"]
+      Environment:
+        Variables:
+          DB_HOST: !Ref AdminDBHost
+          DB_PORT: !Ref AdminDBPort
+          DB_NAME: !Ref AdminDBName
+          DB_USER: !Ref AdminDBUser
+          DB_PASSWORD: !Ref AdminDBPassword
+      Events:
+        AdminApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /admins/{proxy+}
+            Method: ANY
+
+Outputs:
+  IdentityApiUrl:
+    Value: !Sub https://${IdentityApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+    Export:
+      Name: !Sub school-identity-api-url-${Environment}
+  IdentityEventBusArn:
+    Value: !GetAtt IdentityEventBus.Arn
+    Export:
+      Name: !Sub school-identity-bus-arn-${Environment}
