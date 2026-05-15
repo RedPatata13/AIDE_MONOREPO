@@ -8,8 +8,8 @@ import { handler as createStudent } from './handlers/create';
 import { handler as getStudents } from './handlers/getStudents';
 import { handler as getStudent } from './handlers/getStudent';
 
-// import { handler as updateStudent } from './handlers/update';
-// import { handler as deleteStudent } from './handlers/delete';
+import { handler as updateStudent } from './handlers/update';
+import { handler as deleteStudent } from './handlers/delete';
 
 export const handler: APIGatewayProxyHandler = async (
 	event: APIGatewayProxyEvent,
@@ -74,24 +74,24 @@ export const handler: APIGatewayProxyHandler = async (
 			}
 
 			// UPDATE STUDENT
-			// if (httpMethod === 'PUT' && resourceId) {
-			// 	event.pathParameters = {
-			// 		...(event.pathParameters || {}),
-			// 		studentId: resourceId,
-			// 	};
-			//
-			// 	return await updateStudent(event, context, callback);
-			// }
+			if (httpMethod === 'PUT' && resourceId) {
+				event.pathParameters = {
+					...(event.pathParameters || {}),
+					studentId: resourceId,
+				};
+			
+				return await updateStudent(event, context, callback)!;
+			}
 
 			// DELETE STUDENT
-			// if (httpMethod === 'DELETE' && resourceId) {
-			// 	event.pathParameters = {
-			// 		...(event.pathParameters || {}),
-			// 		studentId: resourceId,
-			// 	};
-			//
-			// 	return await deleteStudent(event, context, callback);
-			// }
+			if (httpMethod === 'DELETE' && resourceId) {
+				event.pathParameters = {
+					...(event.pathParameters || {}),
+					studentId: resourceId,
+				};
+			
+				return await deleteStudent(event, context, callback)!;
+			}
 		}
 
 		return {

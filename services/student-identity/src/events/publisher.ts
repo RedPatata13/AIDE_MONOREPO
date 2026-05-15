@@ -11,11 +11,13 @@ const client = new EventBridgeClient({
 type IdentityEventType =
   | 'student.created'
   | 'student.updated'
-  | 'student.deleted';
+  | 'student.deleted'
+  | 'student.deactivated'
+  ;
 
 export const publishIdentityEvent = async (
   eventType: IdentityEventType,
-  snapshot: Student
+  snapshot: Partial<Student>
 ): Promise<void> => {
   const response = await client.send(
     new PutEventsCommand({
