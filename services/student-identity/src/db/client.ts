@@ -33,7 +33,7 @@ export const initializeDb = async (db: Pool) => {
 		database: 'postgres',
 		user: process.env.DB_USER,
 		password: process.env.DB_PASSWORD,
-		ssl: { rejectUnauthorized: false }
+		ssl: false
 	});
 
 	await client.connect();

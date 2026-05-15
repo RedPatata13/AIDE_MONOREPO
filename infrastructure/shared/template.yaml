@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AIDE — Shared Infrastructure
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, prod]
+
+Resources:
+  IdentityEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub aide-identity-${Environment}
+
+Outputs:
+  IdentityEventBusArn:
+    Value: !GetAtt IdentityEventBus.Arn
+    Export:
+      Name: !Sub aide-identity-bus-arn-${Environment}
+
+  IdentityEventBusName:
+    Value: !Ref IdentityEventBus
+    Export:
+      Name: !Sub aide-identity-bus-name-${Environment}

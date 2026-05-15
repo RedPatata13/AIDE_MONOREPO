@@ -1,21 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { Pool } from "pg";
 import { getDb, initializeDb } from "../db/client";
-import { Student } from "../models/student";
-import { StudentDto } from "../dto/studentDto";
-import { toStudentDto } from "../mappers/mapper";
+import { Admin } from "../models/admin";
+import { AdminDto } from "../dto/adminDto";
+import { toAdminDto } from "../mappers/mapper";
 
 export const handler: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
     try {
-        const studentId = event.pathParameters?.studentId;
+        const adminId = event.pathParameters?.studentId;
 
-        if(!studentId){
+        if(!adminId){
             return {
                 statusCode: 400,
                 body: JSON.stringify({
-                    message: 'studentId is required',
+                    message: 'adminId is required',
                 }),
             }
         }
@@ -23,44 +23,42 @@ export const handler: APIGatewayProxyHandler = async (
         const db : Pool = getDb();
         await initializeDb(db);
 
-        const result = await db.query<Student>(
+        const result = await db.query<Admin>(
             `
             SELECT
-                student_id AS "studentId",
+                admin_id AS "adminId",
                 cognito_sub AS "cognitoSub",
-                first_name AS "firstName",
-                last_name AS "lastName",
+                username,
                 email,
-                enrollment_year AS "enrollmentYear",
                 status,
                 created_at AS "createdAt",
                 updated_at AS "updatedAt"
-            FROM students
-            WHERE student_id = $1
+            FROM admins
+            WHERE admin_id = $1
             LIMIT 1
             `,
-            [studentId]
+            [adminId]
         );
 
-        const student = result.rows[0];
+        const admin = result.rows[0];
 
-        if(!student){
+        if(!admin){
             return {
                 statusCode: 404,
                 body: JSON.stringify({
-                    message: `Student not found: ${studentId}`
+                    message: `admin not found: ${adminId}`
                 })
             }
         }
 
-        const dto : StudentDto = toStudentDto(student);
+        const dto : AdminDto = toAdminDto(admin);
 
         return {
             statusCode: 200,
             body: JSON.stringify(dto),
         };
     } catch (err) {
-        console.error('get student error' , err);
+        console.error('get admin error' , err);
 
         return {
             statusCode: 500,

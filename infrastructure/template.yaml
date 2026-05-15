@@ -82,7 +82,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      ImageUri: student-identity:latest
       ImageConfig:
         Command: ["app.handler"]
       Environment:
@@ -92,16 +91,44 @@ Resources:
           DB_NAME: !Ref StudentDBName
           DB_USER: !Ref StudentDBUser
           DB_PASSWORD: !Ref StudentDBPassword
+      Policies:
+      - EventBridgePutEventsPolicy:
+          EventBusName: !Ref IdentityEventBus
       Events:
-        StudentsApi:
+        GetStudents:
           Type: Api
           Properties:
             RestApiId: !Ref IdentityApi
-            Path: /students/{proxy+}
-            Method: ANY
-      Policies:
-        - EventBridgePutEventsPolicy:
-            EventBusName: !Ref IdentityEventBus
+            Path: /students
+            Method: GET
+
+        CreateStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /students
+            Method: POST
+
+        GetStudentById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /students/{id}
+            Method: GET
+
+        UpdateStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /students/{id}
+            Method: PUT
+
+        DeleteStudent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref IdentityApi
+            Path: /students/{id}
+            Method: DELETE
     Metadata:
       DockerTag: student-identity
       DockerContext: ../services/student-identity

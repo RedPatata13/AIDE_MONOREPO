@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AIDE — Admin Identity Service
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        DB_HOST: !Ref DBHost
+        DB_PORT: !Ref DBPort
+        DB_NAME: !Ref DBName
+        DB_USER: !Ref DBUser
+        DB_PASSWORD: !Ref DBPassword
+        EVENT_BUS_NAME: !ImportValue
+          !Sub aide-identity-bus-name-${Environment}
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+        COGNITO_CLIENT_ID: !Ref CognitoClientId
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, prod]
+  DBHost:
+    Type: String
+  DBPort:
+    Type: String
+    Default: "5432"
+  DBName:
+    Type: String
+  DBUser:
+    Type: String
+  DBPassword:
+    Type: String
+    NoEcho: true
+  CognitoUserPoolId:
+    Type: String
+  CognitoClientId:
+    Type: String
+
+Resources:
+
+  AdminApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+
+  # --- Handlers ---
+  GetAdminsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["handlers/getAdmins.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !ImportValue
+              !Sub aide-identity-bus-name-${Environment}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AdminApi
+            Path: /admins
+            Method: GET
+    Metadata:
+      DockerTag: admin-identity
+      DockerContext: ../../services/admin-identity
+      Dockerfile: Dockerfile
+
+  CreateAdminFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["handlers/create.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !ImportValue
+              !Sub aide-identity-bus-name-${Environment}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AdminApi
+            Path: /admins
+            Method: POST
+    Metadata:
+      DockerTag: admin-identity
+      DockerContext: ../../services/admin-identity
+      Dockerfile: Dockerfile
+
+  GetAdminByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["handlers/getAdminById.handler"]
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AdminApi
+            Path: /admins/{id}
+            Method: GET
+    Metadata:
+      DockerTag: admin-identity
+      DockerContext: ../../services/admin-identity
+      Dockerfile: Dockerfile
+
+  UpdateAdminFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["handlers/updateAdmin.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !ImportValue
+              !Sub aide-identity-bus-name-${Environment}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AdminApi
+            Path: /admins/{id}
+            Method: PUT
+    Metadata:
+      DockerTag: admin-identity
+      DockerContext: ../../services/admin-identity
+      Dockerfile: Dockerfile
+
+  DeleteAdminFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["handlers/deleteAdmin.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName: !ImportValue
+              !Sub aide-identity-bus-name-${Environment}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AdminApi
+            Path: /admins/{id}
+            Method: DELETE
+    Metadata:
+      DockerTag: admin-identity
+      DockerContext: ../../services/admin-identity
+      Dockerfile: Dockerfile
+
+  # --- Event Listeners ---
+  AdminCreatedListenerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["handlers/listeners/adminCreated.handler"]
+      Events:
+        AdminCreatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !ImportValue
+              !Sub aide-identity-bus-name-${Environment}
+            Pattern:
+              source:
+                - aide.identity.admin
+              detail-type:
+                - admin.created
+    Metadata:
+      DockerTag: admin-identity
+      DockerContext: ../../services/admin-identity
+      Dockerfile: Dockerfile
+
+Outputs:
+  AdminApiUrl:
+    Value: !Sub https://${AdminApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+    Export:
+      Name: !Sub aide-admin-api-url-${Environment}

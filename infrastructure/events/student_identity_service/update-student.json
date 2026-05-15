@@ -1,0 +1,11 @@
+{
+	"body": "{\"firstName\":\"Jane\",\"status\":\"suspended\"}",
+	"httpMethod": "PUT",
+	"path": "/students/student-id-here",
+	"pathParameters": {
+		"studentId": "student-id-here"
+	},
+	"headers": {
+		"Content-Type": "application/json"
+	}
+}
