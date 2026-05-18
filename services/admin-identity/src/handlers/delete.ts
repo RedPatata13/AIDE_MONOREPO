@@ -16,7 +16,6 @@ export const handler: APIGatewayProxyHandler = async (
 ): Promise<APIGatewayProxyResult> => {
 
 	try {
-
 		const adminId = event.pathParameters?.adminId;
 
 		if (!adminId) {
