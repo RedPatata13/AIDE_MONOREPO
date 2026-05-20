@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SchoolYearStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED 
+}
+
+enum TermStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+model SchoolYearTemplate{
+  templateId String @id @default(cuid())
+  templateName String
+  templateVersion String @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  terms TermTemplate[]
+
+  schoolYears SchoolYearInstance[]
+}
+
+model TermTemplate {
+  id String @id @default(cuid())
+
+  schoolYearTemplateId String
+  schoolYearTemplate SchoolYearTemplate @relation(fields: [schoolYearTemplateId], references: [templateId])
+
+  name String
+  orderNumber Int
+
+  defaultStartOffsetDays Int?
+  defaultEndOffsetDays Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  terms Term[]
+
+  @@unique([schoolYearTemplateId, orderNumber])
+}
+
+model SchoolYearInstance {
+  id String @id @default(cuid())
+
+  schoolYearTemplateId String
+  schoolYearTemplate SchoolYearTemplate @relation(fields: [schoolYearTemplateId], references: [templateId])
+
+  name String
+
+  startDate DateTime
+  endDate DateTime
+
+  status SchoolYearStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  terms Term[]
+
+  @@index([status])
+}
+
+model Term {
+  id String @id @default(cuid())
+
+  schoolYearInstanceId String
+  schoolYearInstance SchoolYearInstance @relation(fields: [schoolYearInstanceId], references: [id])
+
+  templateId String
+  template TermTemplate @relation(fields: [templateId], references: [id])
+
+  name String
+
+  orderNumber Int
+
+  startDate DateTime
+  endDate DateTime
+
+  status TermStatus @default(UPCOMING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // @@unique([order])
+  @@index([status])
+}
