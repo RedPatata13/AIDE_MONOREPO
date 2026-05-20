@@ -22,4 +22,4 @@ Outputs:
   IdentityEventBusName:
     Value: !Ref IdentityEventBus
     Export:
-      Name: !Sub aide-identity-bus-name-${Environment}
+      Name: !Sub aide-identity-${Environment}

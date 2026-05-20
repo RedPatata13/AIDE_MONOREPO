@@ -12,6 +12,8 @@ infrastructure/env/*.json
 .env
 .env.*
 
+dev.json
+
 .aws-sam/
 samconfig.toml
 

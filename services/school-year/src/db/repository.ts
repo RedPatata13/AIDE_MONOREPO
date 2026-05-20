@@ -1,6 +1,7 @@
-import { Prisma, SchoolYearInstance, SchoolYearStatus, TemplateStatus } from "@prisma/client"
-import { prisma } from "../lib/prisma"
-import { getSchoolYearFromTemplate } from "../handlers/helpers/getSYInstanceFromTemplate"
+import { Prisma, SchoolYearInstance, SchoolYearStatus, TemplateStatus, TermStatus } from "@prisma/client"
+import { prisma } from "../lib/prisma.js"
+import { getSchoolYearFromTemplate } from "../handlers/helpers/getSYInstanceFromTemplate.js"
+import { getTermsInstanceFromTemplate } from "../handlers/helpers/getTermsFromTemplate.js"
 
 export class SchoolYearInstanceRepository {
 	async create(input: Prisma.SchoolYearInstanceCreateInput) : Promise<SchoolYearInstance> {
@@ -51,28 +52,88 @@ export class SchoolYearInstanceRepository {
 		})
 	}
 
-	async endCurrentSchoolYearInstance (){
+	async endCurrentSchoolYearInstance() {
 		return prisma.$transaction(async (tx) => {
+			const activeSchoolYears = 
+				await tx.schoolYearInstance.findMany({
+					where: {
+						status: SchoolYearStatus.ACTIVE
+					}
+				}) ;
 			await tx.schoolYearInstance.updateMany({
 				where: {
-					status: SchoolYearStatus.ACTIVE
+					status: SchoolYearStatus.ACTIVE,
 				},
 				data: {
-					status: SchoolYearStatus.COMPLETED
+					status: SchoolYearStatus.COMPLETED,
+				},
+			});
+
+			const schoolYearTemplate =
+				await tx.schoolYearTemplate.findFirstOrThrow({
+					where: {
+						status: TemplateStatus.ACTIVE,
+					},
+				})
+
+			const instance = getSchoolYearFromTemplate(schoolYearTemplate)
+
+			const newSchoolYear =
+				await tx.schoolYearInstance.create({
+					data: instance,
+				})
+
+			return {
+				deactivated: activeSchoolYears,
+				newSchoolYear,
+			}
+		})
+	}
+
+	async deactivateAllTerms(schoolYearInstanceId: string) {
+		return prisma.$transaction(async (tx) => {
+			var activeTerms = await tx.term.findMany({
+				where : { schoolYearInstanceId }
+			});
+
+			if (activeTerms.length === 0) console.warn('No active terms found. SY Instance ID: ', schoolYearInstanceId);
+
+			await tx.term.updateMany({
+				where : { schoolYearInstanceId },
+				data : {
+					status: TermStatus.COMPLETED
 				}
 			});
 
-			const schoolYearTemplate = await tx.schoolYearTemplate.findFirstOrThrow({
-				where: {
-					status: TemplateStatus.ACTIVE
-				}
+			return activeTerms;
+		})
+	}
+
+	async generateTermsForSchoolYear(schoolYearInstanceId: string) {
+		return prisma.$transaction(async (tx) => {
+			const sy = await tx.schoolYearInstance.findFirstOrThrow({
+				where: { id: schoolYearInstanceId },
 			});
 
-			const instance = getSchoolYearFromTemplate(schoolYearTemplate);
+			const termTemplates = await tx.termTemplate.findMany({
+				where: { schoolYearTemplateId: sy.schoolYearTemplateId}
+			});
 
-			return tx.schoolYearInstance.create({
-				data: instance
+			let terms : Prisma.TermCreateManyInput[] = [];
+
+			termTemplates.forEach(t => {
+				terms.push(getTermsInstanceFromTemplate(t, sy.id));
 			})
+
+			const newTerms = await Promise.all(
+				terms.map((term) =>
+					tx.term.create({
+						data: term,
+					})
+				)
+			);
+
+			return newTerms;
 		})
 	}
 }

@@ -1,0 +1,8 @@
+{
+	"body": "{}",
+	"httpMethod": "POST",
+	"path": "/school-year/end",
+	"headers": {
+		"Content-Type": "application/json"
+	}
+}

@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: AIDE - School Year Service
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        DATABASE_URL: !Ref DatabaseUrl
+        EVENT_BUS_NAME:
+          Fn::ImportValue:
+            Fn::Sub: aide-identity-${Environment}
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+        COGNITO_CLIENT_ID: !Ref CognitoClientId
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, prod]
+  DatabaseUrl:
+    Type: String
+  CognitoUserPoolId:
+    Type: String
+  CognitoClientId:
+    Type: String
+
+Resources:
+  SchoolYearApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+
+  EndCurrentSchoolYear:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/endCurrentSchoolYear.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+              
+      Events:
+        ApiEvent:
+          Type: SchoolYearApi
+          Properties: 
+            Path: /school-year/end
+            Method: POST
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+  
+  SchoolYearCreatedListener:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/events/onSchoolYearActivate/schoolYearInstanceCreated.handler
+
+      Events:
+        SchoolYearCreatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+            Pattern:
+              source:
+                - aide.school-year
+
+              detail-type:
+                - schoolYearInstance.created
+
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+
+  SchoolYearDeactivatedListener:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/events/onSchoolYearDeactivate/schoolYearInstanceDeactivated.handler
+
+      Events:
+        SchoolYearDeactivatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+            Pattern:
+              source:
+                - aide.school-year
+
+              detail-type:
+                - schoolYearInstance.deactivated
+
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile

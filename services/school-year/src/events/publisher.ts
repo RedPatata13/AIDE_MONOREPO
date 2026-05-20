@@ -19,6 +19,8 @@ type SchoolYearServiceEventType =
   | 'termTemplate.updated'
   | 'term.ends'
   | 'term.starts'
+  | 'term.created'
+  | 'term.deactivated'
   ;
 export const publishSchoolYearEvent = async (
   eventType: SchoolYearServiceEventType,
@@ -79,7 +81,7 @@ export const publishTermTemplateEvent = async (
       Entries: [
         {
           EventBusName: process.env.EVENT_BUS_NAME,
-          Source: 'school.term',
+          Source: 'school.term.template',
           DetailType: eventType,
           Detail: JSON.stringify({
             eventVersion: '1.0',
@@ -104,7 +106,7 @@ export const publishSchoolYearTemplateEvent = async (
       Entries: [
         {
           EventBusName: process.env.EVENT_BUS_NAME,
-          Source: 'school.term',
+          Source: 'school.year.template',
           DetailType: eventType,
           Detail: JSON.stringify({
             eventVersion: '1.0',

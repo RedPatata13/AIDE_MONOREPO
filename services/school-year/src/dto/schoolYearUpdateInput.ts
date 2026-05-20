@@ -1,5 +1,5 @@
 import { SchoolYearStatus, SchoolYearInstance } from "@prisma/client"
-import { SchoolYearInstanceDto } from "./schoolYearInstanceDto"
+import { SchoolYearInstanceDto } from "./schoolYearInstanceDto.js"
 
 export interface UpdateSchoolYearInstanceInput {
 	name?: string

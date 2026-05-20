@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "NODE_ENV": "test",
+    "AWS_REGION": "ap-southeast-1",
+    "DB_HOST": "YOUR_RDS_TEST_ENDPOINT",
+    "DB_PORT": "3306",
+    "DB_NAME": "school_test",
+    "DB_USER": "school",
+    "DB_PASSWORD": "REPLACE_ME",
+    "EVENT_BUS_NAME": "school-identity-test",
+    "COGNITO_USER_POOL_ID": "ap-southeast-1_XXXXXXXXX",
+    "COGNITO_CLIENT_ID": "XXXXXXXXXXXXXXXXXXXXXXXXXX"
+  }
+}
