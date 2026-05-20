@@ -18,6 +18,11 @@ enum SchoolYearStatus {
   ARCHIVED 
 }
 
+enum TemplateStatus {
+  ARCHIVED
+  ACTIVE
+}
+
 enum TermStatus {
   UPCOMING
   ACTIVE
@@ -29,7 +34,7 @@ model SchoolYearTemplate{
   templateName String
   templateVersion String @unique
   description String?
-
+  status TemplateStatus @default(ARCHIVED)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
