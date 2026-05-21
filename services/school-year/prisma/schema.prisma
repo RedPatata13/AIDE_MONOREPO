@@ -27,6 +27,7 @@ enum TermStatus {
   UPCOMING
   ACTIVE
   COMPLETED
+  ARCHIVED
 }
 
 model SchoolYearTemplate{

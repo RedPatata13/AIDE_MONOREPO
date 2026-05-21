@@ -179,8 +179,25 @@ export class SchoolYearInstanceRepository {
 					status: SchoolYearStatus.ARCHIVED
 				}
 			});
-			
+
 			return { schoolYear };
+		})
+	}
+
+	async lockTerm(id: string) {
+		return prisma.$transaction(async (tx) => {
+			const term = await tx.schoolYearInstance.findFirstOrThrow({
+				where : { id }
+			});
+
+			await tx.term.update({
+				where : { id },
+				data : {
+					status: TermStatus.ARCHIVED
+				}
+			})
+
+			return { term };
 		})
 	}
 }

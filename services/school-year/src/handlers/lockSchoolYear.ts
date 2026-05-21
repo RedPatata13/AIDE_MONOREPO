@@ -21,9 +21,9 @@ export const handler: APIGatewayProxyHandler = async (
             })
         }
     } catch (err){
-        if (err instanceof Prisma.PrismaClientKnownRequestError){
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025"){
             return {
-                statusCode: 200,
+                statusCode: 404,
                 body: JSON.stringify({
                     message: `School year does not exist: ${schoolYearId}`
                 })

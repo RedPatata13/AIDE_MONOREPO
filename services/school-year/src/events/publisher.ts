@@ -22,6 +22,7 @@ type SchoolYearServiceEventType =
   | 'term.starts'
   | 'term.created'
   | 'term.deactivated'
+  | 'term.archived'
   | 'lastTerm.ends'
   ;
 export const publishSchoolYearEvent = async (
