@@ -12,7 +12,7 @@ export const handler: APIGatewayProxyHandler = async (
 
         result.deactivated.map(d => publishSchoolYearEvent('schoolYearInstance.deactivated', d));
         publishSchoolYearEvent('schoolYearInstance.created', result.newSchoolYear);
-
+        console.log('Current School Year Ended Successfully');
         return {
             statusCode: 200,
             body: JSON.stringify({

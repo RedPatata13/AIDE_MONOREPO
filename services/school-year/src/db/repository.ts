@@ -136,4 +136,51 @@ export class SchoolYearInstanceRepository {
 			return newTerms;
 		})
 	}
+
+	async endCurrentActiveTerms(){
+		return prisma.$transaction(async (tx) => {
+			let currSchoolYear = await tx.schoolYearInstance.findFirst({
+				where : {
+					status: SchoolYearStatus.ACTIVE
+				}
+			});
+
+			if(!currSchoolYear) throw new Error("ACTIVE_SY_NOT_FOUND");
+			const terms = await tx.term.findMany({
+				where : {
+					schoolYearInstanceId: currSchoolYear.id,
+					status: TermStatus.ACTIVE
+				}
+			});
+			await tx.term.updateMany({
+				where : { 
+					schoolYearInstanceId : currSchoolYear.id ,
+					status: TermStatus.ACTIVE
+				},
+				data: {
+					status: TermStatus.COMPLETED
+				}
+			});
+
+			return {
+				terms,
+			}
+		});
+	}
+
+	async lockSchoolYear(id: string) {
+		return prisma.$transaction(async (tx) => {
+			const schoolYear = await tx.schoolYearInstance.findFirstOrThrow({
+				where : { id }
+			});
+			await tx.schoolYearInstance.update({
+				where : { id },
+				data : {
+					status: SchoolYearStatus.ARCHIVED
+				}
+			});
+			
+			return { schoolYear };
+		})
+	}
 }

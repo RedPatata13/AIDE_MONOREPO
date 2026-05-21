@@ -1,0 +1,3 @@
+[] term deactivated event
+[] last term deactivated event
+[] sy locked

@@ -75,7 +75,7 @@ Resources:
 
             Pattern:
               source:
-                - aide.school-year
+                - aide.school.year
 
               detail-type:
                 - schoolYearInstance.created
@@ -104,7 +104,7 @@ Resources:
 
             Pattern:
               source:
-                - aide.school-year
+                - aide.school.year
 
               detail-type:
                 - schoolYearInstance.deactivated

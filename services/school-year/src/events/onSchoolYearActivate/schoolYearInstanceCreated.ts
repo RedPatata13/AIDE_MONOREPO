@@ -14,9 +14,9 @@ export const handler = async (event: EventBridgeEvent<string, any>): Promise<API
         const repo = new SchoolYearInstanceRepository();
         const terms = await repo.generateTermsForSchoolYear(schoolYear.id ?? "Missing ID");
 
-        terms.map(t => {
-            publishTermEvent('term.created', t);
-        });
+        await Promise.all(
+            terms.map(t => publishTermEvent('term.created', t))
+        );
 
         return {
             statusCode: 200,
