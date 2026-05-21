@@ -158,7 +158,8 @@ export class SchoolYearInstanceRepository {
 					status: TermStatus.ACTIVE
 				},
 				data: {
-					status: TermStatus.COMPLETED
+					status: TermStatus.COMPLETED,
+					dateCompleted: new Date()
 				}
 			});
 
@@ -198,6 +199,34 @@ export class SchoolYearInstanceRepository {
 			})
 
 			return { term };
+		})
+	}
+
+	async restoreSchoolyear(id : string) {
+		return prisma.$transaction(async (tx) => {
+			const schoolYear = await tx.schoolYearInstance.findFirstOrThrow({
+				where : { id }
+			});
+
+			if (schoolYear.status !== SchoolYearStatus.COMPLETED) throw new Error("SY_NOT_COMPLETE");
+			if (schoolYear.dateCompleted === null) throw new Error("COMP_DATE_MISSING");
+
+			const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+			const diff = new Date().getTime() - schoolYear.dateCompleted.getTime();
+
+			if (diff > ONE_WEEK_MS) {
+				throw new Error("RESTORE_WINDOW_EXPIRED");
+			}
+
+			const restored = await tx.schoolYearInstance.update({
+				where : { id },
+				data : {
+					status: SchoolYearStatus.ACTIVE,
+					dateCompleted: null
+				}
+			});
+
+			return { restored };
 		})
 	}
 }

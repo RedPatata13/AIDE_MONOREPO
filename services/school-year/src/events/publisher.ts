@@ -15,6 +15,7 @@ type SchoolYearServiceEventType =
   | 'schoolYearInstance.deleted'
   | 'schoolYearInstance.archived'
   | 'schoolYearInstance.deactivated'
+  | 'schoolYearInstance.reactivated'
   | 'schoolYearInstance.ends'
   | 'schoolYearTemplate.updated'
   | 'termTemplate.updated'
