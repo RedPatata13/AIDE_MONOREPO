@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import { SchoolYearInstanceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository } from "../db/repository.js";
 import { Prisma } from "@prisma/client";
 import { publishSchoolYearEvent } from "../events/publisher.js";
 
@@ -9,7 +9,7 @@ export const handler: APIGatewayProxyHandler = async (
     const schoolYearId = event.pathParameters?.id;
     if(!schoolYearId) throw new Error('NO_ID');
     try {
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
         const lockedSchoolyear = (await repo.lockSchoolYear(schoolYearId)).schoolYear;
 
         console.log(`School Year with ID is locked: ${schoolYearId}`);

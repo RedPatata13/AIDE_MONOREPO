@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import { SchoolYearInstanceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository } from "../db/repository.js";
 import { publishSchoolYearEvent } from "../events/publisher.js";
 
 export const handler : APIGatewayProxyHandler = async (
@@ -8,7 +8,7 @@ export const handler : APIGatewayProxyHandler = async (
     const termId = event.pathParameters?.id;
     if (!termId) throw new Error("NO_ID");
     try {
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
         const restored = (await repo.restoreTerm(termId)).restored;
 
         console.log("Term restored with ID: " + termId);

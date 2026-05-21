@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma.js"
 import { getSchoolYearFromTemplate } from "../handlers/helpers/getSYInstanceFromTemplate.js"
 import { getTermsInstanceFromTemplate } from "../handlers/helpers/getTermsFromTemplate.js"
 
-export class SchoolYearInstanceRepository {
+export class SchoolYearServiceRepository {
 	async create(input: Prisma.SchoolYearInstanceCreateInput) : Promise<SchoolYearInstance> {
 		return prisma.schoolYearInstance.create({
 			data: input
@@ -52,7 +52,46 @@ export class SchoolYearInstanceRepository {
 			where: { id },
 		})
 	}
+	async activateSchoolYearDraft(id: string) {
+		return prisma.$transaction(async (tx) => {
+			const sy = await tx.schoolYearInstance.findFirstOrThrow({
+				where : { id }
+			});
 
+			if (sy.status !== SchoolYearStatus.DRAFT) {
+				throw new Error("SY_NOT_DRAFT");
+			}
+
+			await tx.schoolYearInstance.update({
+				where :  { id },
+				data : {
+					status: SchoolYearStatus.ACTIVE
+				}
+			})
+
+			return sy;
+		})
+	}
+	async activateUpcomingTerm(id: string){
+		return prisma.$transaction(async (tx) => {
+			const term = await tx.term.findFirstOrThrow({
+				where : { id }
+			});
+
+			if (term.status !== TermStatus.UPCOMING) {
+				throw new Error("TERM_NOT_UPCOMING");
+			}
+
+			await tx.term.update({
+				where: { id },
+				data : {
+					status: TermStatus.ACTIVE,
+				}
+			})
+
+			return term;
+		})
+	}
 	async updateSchoolYearInstanceStatus(
 		id: string,
 		status: SchoolYearStatus,

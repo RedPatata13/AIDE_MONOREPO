@@ -1,0 +1,10 @@
+{
+	"httpMethod": "PATCH",
+	"path": "/term/activate/",
+	"pathParameters": {
+		"id" : "cmpduecg700000gnw3cap0qbb"
+	},
+	"headers": {
+		"Content-Type": "application/json"
+	}
+}

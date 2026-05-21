@@ -1,12 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import { SchoolYearInstanceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository } from "../db/repository.js";
 import { publishTermEvent } from "../events/publisher.js";
 
 export const handler: APIGatewayProxyHandler = async(
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
     try {
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
         const deactivatedTerms = (await repo.endCurrentActiveTerms()).terms;
 
         await Promise.all(

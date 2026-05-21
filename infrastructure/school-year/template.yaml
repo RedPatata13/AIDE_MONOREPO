@@ -94,7 +94,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref SchoolYearApi
-            Path: /school-year/lock
+            Path: /school-year/lock/{id}
             Method: PATCH
     Metadata:
       DockerTag: school-year
@@ -117,7 +117,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref SchoolYearApi
-            Path: /term/lock
+            Path: /term/lock/{id}
             Method: PATCH
     Metadata:
       DockerTag: school-year
@@ -140,7 +140,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref SchoolYearApi
-            Path: /school-year/restore
+            Path: /school-year/restore/{id}
             Method: PATCH
     Metadata:
       DockerTag: school-year
@@ -163,7 +163,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref SchoolYearApi
-            Path: /term/restore
+            Path: /term/restore/{id}
             Method: PATCH
     Metadata:
       DockerTag: school-year
@@ -186,7 +186,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref SchoolYearApi
-            Path: /school-year/update
+            Path: /school-year/update/{id}
             Method: PATCH
     Metadata:
       DockerTag: school-year
@@ -210,6 +210,52 @@ Resources:
           Properties:
             ApiId: !Ref SchoolYearApi
             Path: /school-year-template/update/{id}
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+  
+  ActivateSchoolYearDraft:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/activateSchoolYearDraft.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /school-year/activate/{id}
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+
+  ActivateUpcomingTerm:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/activateUpcomingTerm.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /term/activate/{id}
             Method: PATCH
     Metadata:
       DockerTag: school-year

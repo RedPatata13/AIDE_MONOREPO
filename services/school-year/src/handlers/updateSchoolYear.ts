@@ -3,7 +3,7 @@ import {
 	APIGatewayProxyHandler,
 	APIGatewayProxyResult
 } from "aws-lambda";
-import { SchoolYearInstanceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository } from "../db/repository.js";
 import { publishSchoolYearEvent } from "../events/publisher.js";
 import { Prisma } from "@prisma/client";
 
@@ -31,7 +31,7 @@ export const handler: APIGatewayProxyHandler = async (
 		}
 
 		const body = JSON.parse(event.body);
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
 
 		const updated = await repo.updateSchoolYear(id, {
 			name: body.name,

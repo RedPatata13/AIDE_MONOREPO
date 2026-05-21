@@ -1,6 +1,6 @@
 import { APIGatewayProxyResult, EventBridgeEvent } from "aws-lambda"
 import { publishTermEvent } from "../publisher.js";
-import { SchoolYearInstanceRepository } from "../../db/repository.js";
+import { SchoolYearServiceRepository } from "../../db/repository.js";
 import { Prisma } from "@prisma/client";
 
 export const handler = async (event: EventBridgeEvent<string, any>): Promise<APIGatewayProxyResult>  => {
@@ -11,7 +11,7 @@ export const handler = async (event: EventBridgeEvent<string, any>): Promise<API
 
         console.log(`School Year Created: `, schoolYear);
 
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
         const terms = await repo.generateTermsForSchoolYear(schoolYear.id ?? "Missing ID");
 
         await Promise.all(

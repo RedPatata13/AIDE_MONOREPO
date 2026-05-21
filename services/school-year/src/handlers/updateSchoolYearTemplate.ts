@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import { SchoolYearInstanceRepository as SchoolYearServiceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository as SchoolYearServiceRepository } from "../db/repository.js";
 import { publishSchoolYearEvent, publishSchoolYearTemplateEvent } from "../events/publisher.js";
 
 export const handler: APIGatewayProxyHandler = async (

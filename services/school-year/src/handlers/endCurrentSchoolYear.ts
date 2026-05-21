@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import { SchoolYearInstanceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository } from "../db/repository.js";
 import { Prisma } from "@prisma/client";
 import { publishSchoolYearEvent } from "../events/publisher.js";
 
@@ -7,7 +7,7 @@ export const handler: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
     try {
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
         const result = await repo.endCurrentSchoolYearInstance();
 
         result.deactivated.map(d => publishSchoolYearEvent('schoolYearInstance.deactivated', d));

@@ -1,0 +1,10 @@
+{
+	"httpMethod": "PATCH",
+	"path": "/school-year/activate/",
+	"pathParameters": {
+		"id" : "cmpdq48f000000gs7wkjxh3fn"
+	},
+	"headers": {
+		"Content-Type": "application/json"
+	}
+}

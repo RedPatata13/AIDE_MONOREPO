@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import { SchoolYearInstanceRepository } from "../db/repository.js";
+import { SchoolYearServiceRepository } from "../db/repository.js";
 import { publishSchoolYearEvent } from "../events/publisher.js";
 import { Prisma } from "@prisma/client";
 
@@ -10,7 +10,7 @@ export const handler : APIGatewayProxyHandler = async (
     if(!id) throw new Error("NO_ID");
 
     try {
-        const repo = new SchoolYearInstanceRepository();
+        const repo = new SchoolYearServiceRepository();
         const sy = (await repo.restoreSchoolyear(id)).restored;
 
         await publishSchoolYearEvent('schoolYearInstance.reactivated', sy);
