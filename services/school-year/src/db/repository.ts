@@ -229,4 +229,32 @@ export class SchoolYearInstanceRepository {
 			return { restored };
 		})
 	}
+
+	async restoreTerm(termId: string) {
+		return prisma.$transaction(async (tx) => {
+			const term = await tx.schoolYearInstance.findFirstOrThrow({
+				where : { id: termId }
+			});
+
+			if (term.status !== TermStatus.COMPLETED) throw new Error("SY_NOT_COMPLETE");
+			if (term.dateCompleted === null) throw new Error("COMP_DATE_MISSING");
+
+			const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+			const diff = new Date().getTime() - term.dateCompleted.getTime();
+
+			if (diff > ONE_WEEK_MS) {
+				throw new Error("RESTORE_WINDOW_EXPIRED");
+			}
+
+			const restored = await tx.schoolYearInstance.update({
+				where : { id: termId },
+				data : {
+					status: TermStatus.ACTIVE,
+					dateCompleted: null
+				}
+			});
+
+			return { restored };
+		})
+	}
 }

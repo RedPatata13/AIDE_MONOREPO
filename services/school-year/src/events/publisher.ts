@@ -22,6 +22,7 @@ type SchoolYearServiceEventType =
   | 'term.ends'
   | 'term.starts'
   | 'term.created'
+  | 'term.restored'
   | 'term.deactivated'
   | 'term.archived'
   | 'lastTerm.ends'
