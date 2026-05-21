@@ -37,7 +37,7 @@ export class SchoolYearInstanceRepository {
 		})
 	}
 
-	async updateTemplate(
+	async updateSchoolYearTemplate(
 		id : string,
 		input: Prisma.SchoolYearTemplateUpdateInput
 	) : Promise<SchoolYearTemplate> {
