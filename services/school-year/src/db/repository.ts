@@ -1,4 +1,4 @@
-import { Prisma, SchoolYearInstance, SchoolYearStatus, TemplateStatus, TermStatus } from "@prisma/client"
+import { Prisma, SchoolYearInstance, SchoolYearStatus, SchoolYearTemplate, TemplateStatus, TermStatus } from "@prisma/client"
 import { prisma } from "../lib/prisma.js"
 import { getSchoolYearFromTemplate } from "../handlers/helpers/getSYInstanceFromTemplate.js"
 import { getTermsInstanceFromTemplate } from "../handlers/helpers/getTermsFromTemplate.js"
@@ -24,13 +24,26 @@ export class SchoolYearInstanceRepository {
 		return prisma.schoolYearInstance.findMany()
 	}
 
-	async update(
+	async updateSchoolYear(
 		id: string,
 		input: Prisma.SchoolYearInstanceUpdateInput,
 	): Promise<SchoolYearInstance> {
+		await prisma.schoolYearInstance.findFirstOrThrow({
+			where: { id }
+		});
 		return prisma.schoolYearInstance.update({
 			where: { id },
 			data: input,
+		})
+	}
+
+	async updateTemplate(
+		id : string,
+		input: Prisma.SchoolYearTemplateUpdateInput
+	) : Promise<SchoolYearTemplate> {
+		return prisma.schoolYearTemplate.update({
+			where: { templateId: id },
+			data: input
 		})
 	}
 
