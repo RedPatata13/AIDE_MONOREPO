@@ -1,0 +1,11 @@
+{
+	"body": "{\"name\":\"Standard Template\",\"description\":\"Standard Template that generates School years automatically\"}",
+	"httpMethod": "PATCH",
+	"path": "/school-year-template/update",
+	"pathParameters": {
+		"id" : "cmpc3bn190000s42st0wfw4jk"
+	},
+	"headers": {
+		"Content-Type": "application/json"
+	}
+}

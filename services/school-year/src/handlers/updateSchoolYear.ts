@@ -41,6 +41,9 @@ export const handler: APIGatewayProxyHandler = async (
 
 			endDate: body.endDate
 				? new Date(body.endDate)
+				: undefined,
+			status: body.status
+				? body.status
 				: undefined
 		});
 

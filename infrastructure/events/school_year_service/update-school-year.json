@@ -1,0 +1,11 @@
+{
+	"body": "{\"name\":\"SY2026\",\"status\":\"ACTIVE\"}",
+	"httpMethod": "PUT",
+	"path": "/students/student-id-here",
+	"pathParameters": {
+		"id" : "cmpdq48f000000gs7wkjxh3fn"
+	},
+	"headers": {
+		"Content-Type": "application/json"
+	}
+}

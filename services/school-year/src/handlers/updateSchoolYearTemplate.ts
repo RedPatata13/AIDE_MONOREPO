@@ -25,7 +25,7 @@ export const handler: APIGatewayProxyHandler = async (
             description: body.description
         });
 
-        publishSchoolYearTemplateEvent('schoolYearTemplate.updated', updated);
+        await publishSchoolYearTemplateEvent('schoolYearTemplate.updated', updated);
 
         return {
             statusCode: 200,
@@ -34,6 +34,7 @@ export const handler: APIGatewayProxyHandler = async (
             })
         }
     } catch (err) {
+        console.error(err);
         if (err instanceof Error){
             if(err.message === "NO_ID"){
                 return {

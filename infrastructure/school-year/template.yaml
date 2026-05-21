@@ -26,7 +26,6 @@ Parameters:
     Type: String
   CognitoClientId:
     Type: String
-
 Resources:
   SchoolYearApi:
     Type: AWS::Serverless::HttpApi
@@ -44,23 +43,183 @@ Resources:
             EventBusName:
               Fn::ImportValue:
                 Fn::Sub: aide-identity-${Environment}
-              
       Events:
         ApiEvent:
-          Type: SchoolYearApi
+          Type: HttpApi
           Properties: 
+            ApiId: !Ref SchoolYearApi
             Path: /school-year/end
             Method: POST
     Metadata:
       DockerTag: school-year
       DockerContext: ../../services/school-year
       Dockerfile: Dockerfile
+
+  EndCurrentTerm:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/endCurrentTerm.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /term/end
+            Method: POST
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+
+  LockSchoolYear:
+    Type: AWS::Serverless::Function 
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/lockSchoolYear.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /school-year/lock
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+    
+  LockTerm:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig: 
+        Command: ["dist/handlers/lockTerm.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /term/lock
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
   
+  RestoreSchoolYear:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/restoreSchoolYear.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /school-year/restore
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+  
+  RestoreTerm:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/restoreTerm.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /term/restore
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+
+  UpdateSchoolYear:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/updateSchoolYear.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /school-year/update
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+
+  UpdateSchoolYearTemplate:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command: ["dist/handlers/updateSchoolYearTemplate.handler"]
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SchoolYearApi
+            Path: /school-year-template/update/{id}
+            Method: PATCH
+    Metadata:
+      DockerTag: school-year
+      DockerContext: ../../services/school-year
+      Dockerfile: Dockerfile
+
   SchoolYearCreatedListener:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-
       ImageConfig:
         Command:
           - dist/events/onSchoolYearActivate/schoolYearInstanceCreated.handler
