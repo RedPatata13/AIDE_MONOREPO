@@ -1,16 +1,21 @@
 import {
 	APIGatewayProxyEventV2,
+	APIGatewayProxyEventV2WithJWTAuthorizer,
 	APIGatewayProxyResultV2
 } from "aws-lambda";
 
 import { CourseRepository } from "../db/repository.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
+import { NotAdminError } from "../errors/notAdminError.js";
+import { NotAuthorizedError } from "../errors/notAuthorizedError.js";
 
 export const handler = async (
-	event: APIGatewayProxyEventV2
+	event: APIGatewayProxyEventV2WithJWTAuthorizer
 ): Promise<APIGatewayProxyResultV2> => {
 
 	try {
 		const courseId = event.pathParameters?.id;
+		await requireAdmin(event);
 
 		if (!courseId) {
 			return {
@@ -86,7 +91,14 @@ export const handler = async (
 					})
 				};
 			}
-
+			if (err instanceof NotAdminError || err instanceof NotAuthorizedError){
+						return {
+							statusCode: 403,
+							body: JSON.stringify({
+								message: 'User needs to be an admin to perform this operation'
+							})
+						}
+					}
 			if (
 				err.message ===
 				"CIRCULAR_DEPENDENCY_DETECTED"

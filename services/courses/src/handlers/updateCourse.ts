@@ -17,7 +17,7 @@ export const handler = async (
 ): Promise<APIGatewayProxyResultV2> => {
 	try {
 		const id = event.pathParameters?.id;
-
+        await requireAdmin(event);
 		if (!id) {
 			throw new NoIdError();
 		}
@@ -96,6 +96,14 @@ export const handler = async (
 				})
 			};
 		}
+        if (err instanceof NotAdminError || err instanceof NotAuthorizedError){
+            return {
+                statusCode: 403,
+                body: JSON.stringify({
+                    message: 'User needs to be an admin to perform this operation'
+                })
+            }
+        }
 
 		if (err instanceof NoBodyError) {
 			return {

@@ -1,16 +1,20 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
+import { APIGatewayProxyEventV2, APIGatewayProxyEventV2WithJWTAuthorizer, APIGatewayProxyResultV2 } from "aws-lambda";
 import { NotFoundError } from "../errors/notFoundError.js";
 import { CourseStatusError } from "../errors/courseStatusError.js";
 import { CourseRepository } from "../db/repository.js";
 import { publishCourseEvent } from "../publisher/publisher.js";
 import { NoIdError } from "../errors/noIdError.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
+import { NotAdminError } from "../errors/notAdminError.js";
+import { NotAuthorizedError } from "../errors/notAuthorizedError.js";
 export const handler = async (
-    event: APIGatewayProxyEventV2
+    event: APIGatewayProxyEventV2WithJWTAuthorizer
 ): Promise<APIGatewayProxyResultV2> => {
     const id = event.pathParameters?.id;
     try {
         // if(!id) throw new Error("NO_ID");
         if(!id) throw new NoIdError();
+        await requireAdmin(event);
         const repo = new CourseRepository();
         const course = await repo.activateCourse(id);
         console.log('Course Deactivated with id: ' + id);
@@ -18,7 +22,8 @@ export const handler = async (
         return {
             statusCode: 200,
             body: JSON.stringify({
-                message: "Course Deactivated with ID: " + id
+                message: "Course Deactivated with ID: " + id,
+                data: course
             })
         }
     } catch (err) {
@@ -28,6 +33,14 @@ export const handler = async (
             body: JSON.stringify({
                 message: 'Missing required parameter: id'
             })
+        }
+        if (err instanceof NotAdminError || err instanceof NotAuthorizedError){
+            return {
+                statusCode: 403,
+                body: JSON.stringify({
+                    message: 'User needs to be an admin to perform this operation'
+                })
+            }
         }
         if (err instanceof NotFoundError) return {
             statusCode: 404,
