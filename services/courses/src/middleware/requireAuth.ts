@@ -1,4 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
+import { NotAuthorizedError } from "../errors/notAuthorizedError.js";
 
 export type AuthenticatedUser = {
 	sub: string;
@@ -14,7 +15,7 @@ export function requireAuth(
 		event.requestContext.authorizer?.jwt?.claims;
 
 	if (!claims) {
-		throw new Error("UNAUTHORIZED");
+		throw new NotAuthorizedError();
 	}
 
 	const rawGroups =

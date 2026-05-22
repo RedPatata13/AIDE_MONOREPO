@@ -6,6 +6,7 @@ import { requireAdmin } from "../middleware/requireAdmin.js";
 import { CourseRepository } from "../db/repository.js";
 import { publishCourseEvent } from "../publisher/publisher.js";
 import { NotAdminError } from "../errors/notAdminError.js";
+import { NotAuthorizedError } from "../errors/notAuthorizedError.js";
 
 export const handler = async (
     event: APIGatewayProxyEventV2WithJWTAuthorizer
@@ -54,7 +55,15 @@ export const handler = async (
             return {
                 statusCode: 403,
                 body: JSON.stringify({
-                    'message': 'User needs to be an admin to access this course: '
+                    message: 'User needs to be an admin to access this course: '
+                })
+            }
+        }
+        if (err instanceof NotAuthorizedError){
+            return {
+                statusCode: 403,
+                body: JSON.stringify({
+                    message: 'Authorization Error. Please log in first.'
                 })
             }
         }
@@ -62,7 +71,7 @@ export const handler = async (
             return {
                 statusCode: 400,
                 body: JSON.stringify({
-                    'message' : "Missing required parameters: body"
+                    message : "Missing required parameters: body"
                 })
             }
         }
