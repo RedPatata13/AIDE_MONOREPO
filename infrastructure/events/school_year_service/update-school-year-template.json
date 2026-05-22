@@ -1,5 +1,5 @@
 {
-	"body": "{\"name\":\"Standard Template\",\"description\":\"Standard Template that generates School years automatically\"}",
+	"body": "{\"name\":\"Standard School Year Template\",\"description\":\"Standard Template that generates School years automatically\"}",
 	"httpMethod": "PATCH",
 	"path": "/school-year-template/update",
 	"pathParameters": {
