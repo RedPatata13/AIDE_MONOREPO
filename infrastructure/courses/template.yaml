@@ -1,0 +1,241 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: AIDE - Course Service
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        DATABASE_URL: !Ref DatabaseUrl
+        EVENT_BUS_NAME:
+          Fn::ImportValue:
+            Fn::Sub: aide-identity-${Environment}
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+        COGNITO_CLIENT_ID: !Ref CognitoClientId
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+
+  DatabaseUrl:
+    Type: String
+
+  CognitoUserPoolId:
+    Type: String
+
+  CognitoClientId:
+    Type: String
+
+Resources:
+
+  CourseApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            JwtConfiguration:
+              issuer:
+                Fn::Sub:
+                  - https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}
+                  - UserPoolId: !Ref CognitoUserPoolId
+
+              audience:
+                - !Ref CognitoClientId
+
+            IdentitySource: "$request.header.Authorization"
+
+        DefaultAuthorizer: CognitoAuthorizer
+
+  CreateCourse:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/createCourse.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses
+            Method: POST
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
+
+  UpdateCourse:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/updateCourse.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses/{id}
+            Method: PATCH
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
+
+  GetCourse:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/getCourse.handler
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses/{id}
+            Method: GET
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
+
+  GetAllCourses:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/getAllCourses.handler
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses
+            Method: GET
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
+
+  ActivateCourse:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/activateCourse.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses/activate/{id}
+            Method: PATCH
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
+
+  DeactivateCourse:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/deactivateCourse.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses/deactivate/{id}
+            Method: PATCH
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
+
+  SetRequiredCourses:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/setRequiredCourses.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CourseApi
+            Path: /courses/{id}/required-courses
+            Method: PUT
+
+    Metadata:
+      DockerTag: course-service
+      DockerContext: ../../services/courses
+      Dockerfile: Dockerfile
