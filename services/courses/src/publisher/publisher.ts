@@ -12,9 +12,10 @@ type CourseServiceEvent =
         'course.created' 
     |   'course.updated' 
     |   'course.activated' 
+    |   'course.deactivated'
     |   'course.archived'
     ;
-export const publishSchoolYearEvent = async (
+export const publishCourseEvent = async (
   eventType: CourseServiceEvent,
   snapshot: Partial<Course>
 ): Promise<void> => {
