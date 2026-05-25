@@ -28,24 +28,12 @@ This repository contains:
 | Service | Status |
 |---|---|
 | school-year-service | In active development |
+| course -service | In active development |
 | other services | Planned / scaffolded |
 
 ---
 
 # School Year Service
-
-The `school-year-service` currently has the most implementation progress.
-
-Implemented features include:
-
-- School year lifecycle management
-- Term lifecycle management
-- EventBridge integration
-- Prisma database integration
-- HTTP API endpoints
-- Event listeners
-- Draft activation workflows
-- Restore and locking mechanics
 
 Source code can be found in:
 
@@ -59,6 +47,20 @@ Infrastructure templates can be found in:
 /infrastructure/school-year
 ```
 
+---
+
+# Course Service
+
+Source code can be foudn in:
+```txt
+/services/courses
+```
+
+Instrastructure templates can be found in:
+
+```txt
+/infrastructure/courses
+```
 ---
 
 # Technology Stack
