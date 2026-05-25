@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: AIDE - Program Service
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        DATABASE_URL: !Ref DatabaseUrl
+        EVENT_BUS_NAME:
+          Fn::ImportValue:
+            Fn::Sub: aide-identity-${Environment}
+        COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+        COGNITO_CLIENT_ID: !Ref CognitoClientId
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+
+  DatabaseUrl:
+    Type: String
+
+  CognitoUserPoolId:
+    Type: String
+
+  CognitoClientId:
+    Type: String
+
+Resources:
+  CourseCreatedListener:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/events/onCourseCreated/courseCreated.handler
+
+      Events:
+        CourseCreatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+            Pattern:
+              source:
+                - aide.course
+
+              detail-type:
+                - course.created
+
+  CourseUpdatedListener:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/events/onCourseUpdated/courseUpdated.handler
+
+      Events:
+        CourseUpdatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+            Pattern:
+              source:
+                - aide.course
+
+              detail-type:
+                - course.updated

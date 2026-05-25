@@ -1,5 +1,5 @@
 import { EventBridgeEvent } from "aws-lambda";
-import { CourseRepository } from "../../db/respository.js";
+import { CourseRepository } from "../../db/courseRespository.js";
 import { Prisma } from "@prisma/client";
 
 type CourseUpdatedEvent = {
