@@ -48,26 +48,20 @@ model Program {
 
 	status ProgramStatus
 
-	programCourses ProgramCourse[]
+	requiredCourses ProgramCourse[]
 
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
 }
 
 model ProgramCourse {
-	id String @id @default(cuid())
+    id String @id @default(cuid())
 
-	programId String
-	courseId String
+    programId String
+    courseId String
 
-	yearLevel Int
-	semester Semester
+    program Program @relation(fields:[programId], references:[id])
+    course Course @relation(fields:[courseId], references:[id])
 
-	isRequired Boolean @default(true)
-
-	program Program @relation(fields: [programId], references: [id])
-
-	course Course @relation(fields: [courseId],references: [id])
-
-	@@unique([programId, courseId])
+    @@unique([programId, courseId])
 }
