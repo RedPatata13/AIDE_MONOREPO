@@ -1,0 +1,21 @@
+{
+	"version": "2.0",
+	"routeKey": "PATCH /courses/activate/{id}",
+	"rawPath": "/courses/activate/course123",
+	"pathParameters": {
+		"id": "cmpkklndz00000gqlxw3orntr"
+	},
+	"headers": {
+		"authorization": "Bearer fake-jwt"
+	},
+	"requestContext": {
+		"authorizer": {
+			"jwt": {
+				"claims": {
+					"sub": "admin-001",
+					"cognito:groups": "admins"
+				}
+			}
+		}
+	}
+}

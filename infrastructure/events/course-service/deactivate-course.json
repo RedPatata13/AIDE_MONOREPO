@@ -1,0 +1,16 @@
+{
+	"version": "2.0",
+	"pathParameters": {
+		"id": "cmpkklndz00000gqlxw3orntr"
+	},
+	"requestContext": {
+		"authorizer": {
+			"jwt": {
+				"claims": {
+					"sub": "admin-001",
+					"cognito:groups": "admins"
+				}
+			}
+		}
+	}
+}

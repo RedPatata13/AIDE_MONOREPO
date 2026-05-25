@@ -1,0 +1,22 @@
+{
+	"version": "2.0",
+	"routeKey": "PATCH /courses/{id}",
+	"rawPath": "/courses/course123",
+	"pathParameters": {
+		"id": "cmpkklndz00000gqlxw3orntr"
+	},
+	"headers": {
+		"authorization": "Bearer fake-jwt"
+	},
+	"requestContext": {
+		"authorizer": {
+			"jwt": {
+				"claims": {
+					"sub": "user-123",
+					"cognito:groups": "admins"
+				}
+			}
+		}
+	},
+	"body": "{\"name\":\"Information Management\",\"description\":\"Updated Description\"}"
+}

@@ -1,0 +1,20 @@
+{
+	"version": "2.0",
+	"routeKey": "POST /courses",
+	"rawPath": "/courses",
+	"headers": {
+		"authorization": "Bearer fake-jwt"
+	},
+	"requestContext": {
+		"authorizer": {
+			"jwt": {
+				"claims": {
+					"sub": "user-123",
+					"email": "admin@example.com",
+					"cognito:groups": "admins"
+				}
+			}
+		}
+	},
+	"body": "{\"name\":\"Computer Science\",\"description\":\"CS Degree Program\"}"
+}

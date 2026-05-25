@@ -1,0 +1,18 @@
+{
+	"version": "2.0",
+	"routeKey": "GET /courses",
+	"rawPath": "/courses",
+	"headers": {
+		"authorization": "Bearer fake-jwt"
+	},
+	"requestContext": {
+		"authorizer": {
+			"jwt": {
+				"claims": {
+					"sub": "user-123",
+					"cognito:groups": "admins"
+				}
+			}
+		}
+	}
+}
