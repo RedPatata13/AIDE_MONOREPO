@@ -16,7 +16,7 @@ export const handler = async (
         if(!id) throw new NoIdError();
         await requireAdmin(event);
         const repo = new CourseRepository();
-        const course = await repo.activateCourse(id);
+        const course = await repo.deactivateCourse(id);
         console.log('Course Deactivated with id: ' + id);
         publishCourseEvent('course.deactivated', course);
         return {
@@ -36,7 +36,7 @@ export const handler = async (
         }
         if (err instanceof NotAdminError || err instanceof NotAuthorizedError){
             return {
-                statusCode: 403,
+                statusCode: 401,
                 body: JSON.stringify({
                     message: 'User needs to be an admin to perform this operation'
                 })
@@ -51,7 +51,7 @@ export const handler = async (
         if (err instanceof CourseStatusError) return {
             statusCode: 400,
             body: JSON.stringify({
-                message: 'Course is not activated'
+                message: 'Course is already not activated'
             })
         }
         return {

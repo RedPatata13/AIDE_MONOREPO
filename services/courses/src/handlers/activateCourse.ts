@@ -34,7 +34,7 @@ export const handler = async (
         }
         if (err instanceof NotAdminError || err instanceof NotAuthorizedError){
             return {
-                statusCode: 403,
+                statusCode: 401,
                 body: JSON.stringify({
                     message: 'User needs to be an admin to perform this operation'
                 })

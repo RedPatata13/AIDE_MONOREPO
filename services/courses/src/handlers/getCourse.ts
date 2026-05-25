@@ -25,7 +25,7 @@ export const handler = async (
         console.error(`Error fetching course with id: ${id}`, err);
         if (err instanceof NotAuthorizedError){
             return {
-                statusCode: 403,
+                statusCode: 401,
                 body: JSON.stringify({
                     message: 'Not authorized'
                 })

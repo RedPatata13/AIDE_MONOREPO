@@ -53,7 +53,7 @@ export const handler = async (
         console.error('Error creating course: ', err);
         if (err instanceof NotAdminError){
             return {
-                statusCode: 403,
+                statusCode: 401,
                 body: JSON.stringify({
                     message: 'User needs to be an admin to access this course: '
                 })
@@ -61,7 +61,7 @@ export const handler = async (
         }
         if (err instanceof NotAuthorizedError){
             return {
-                statusCode: 403,
+                statusCode: 401,
                 body: JSON.stringify({
                     message: 'Authorization Error. Please log in first.'
                 })

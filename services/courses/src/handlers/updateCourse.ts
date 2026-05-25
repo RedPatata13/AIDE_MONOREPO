@@ -117,7 +117,7 @@ export const handler = async (
 
 		if (err instanceof NotAdminError) {
 			return {
-				statusCode: 403,
+				statusCode: 401,
 				body: JSON.stringify({
 					message:
 						"User must be an admin to update courses"
