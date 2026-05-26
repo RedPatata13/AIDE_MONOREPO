@@ -34,6 +34,193 @@ Parameters:
     Type: String
 
 Resources:
+  ProgramApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            JwtConfiguration:
+              issuer:
+                Fn::Sub:
+                  - https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}
+                  - UserPoolId: !Ref CognitoUserPoolId
+              audience:
+                - !Ref CognitoClientId
+
+            IdentitySource: "$request.header.Authorization"
+
+        DefaultAuthorizer: CognitoAuthorizer
+  
+  CreateProgram:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/createProgram.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ProgramApi
+            Path: /programs
+            Method: POST
+
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
+
+  GetAllPrograms:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command:
+          - dist/handlers/getAllPrograms.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ProgramApi
+            Path: /programs
+            Method: GET
+
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
+
+  GetProgram:
+    Type: AWS::Serverless::Function
+
+    Properties:
+      PackageType: Image
+      ImageConfig:
+        Command:
+          - dist/handlers/getProgram.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ProgramApi
+            Path: /programs/{id}
+            Method: GET
+
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
+
+  SetProgramStatus:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/setProgramStatus.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ProgramApi
+            Path: /programs/status/{id}
+            Method: PATCH
+    
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
+
+  SetRequiredCoursesForProgram:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      
+      ImageConfig:
+        Command:
+          - dist/handlers/setRequiredCoursesForProgram.handler
+      
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ProgramApi
+            Path: /programs/courses/{id}
+            Method: PATCH
+
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
+  
+  UpdateProgram:
+    Type: AWS::Serverless::Function
+  
+    Properties:
+      PackageType: Image
+
+      ImageConfig:
+        Command:
+          - dist/handlers/updateProgram.handler
+
+      Policies:
+        - EventBridgePutEventsPolicy:
+            EventBusName:
+              Fn::ImportValue:
+                Fn::Sub: aide-identity-${Environment}
+              
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ProgramApi
+            Path: /programs/update/{id}
+            Method: PATCH
+
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
+
   CourseCreatedListener:
     Type: AWS::Serverless::Function
     Properties:
@@ -57,6 +244,10 @@ Resources:
 
               detail-type:
                 - course.created
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
 
   CourseUpdatedListener:
     Type: AWS::Serverless::Function
@@ -81,3 +272,8 @@ Resources:
 
               detail-type:
                 - course.updated
+                
+    Metadata:
+      DockerTag: program-service
+      DockerContext: ../../services/programs
+      Dockerfile: Dockerfile
