@@ -1,17 +1,20 @@
 import { Router } from "express";
-import { addRoomController } from "./addRoom.controller.js";
 import { NoBodyError } from "../../errors/noBodyError.js";
+import { addScheduleController } from "./addSchedule.controller.js";
 
 const router = Router();
 
 router.post('/', async (req, res) => {
     try {
         if(!req.body) throw new NoBodyError();
+        if(!req.body.sectionId) throw new Error();
+        if(!req.body.teacherId) throw new Error();
+        if(!req.body.courseId) throw new Error();
 
-        const result = await addRoomController(req.body);
+        const result = await addScheduleController(req.body);
 
         res.status(201).json({
-            message: `succesfully created Room with id: ${result.id}`,
+            message: `succesfully created schedule with id: ${result.id}`,
             data: result
         })
     } catch (err){

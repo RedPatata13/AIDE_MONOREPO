@@ -4,7 +4,7 @@ import { NotFoundError } from "../errors/notFoundError.js";
 
 export class VenueRepository {
     async addRoom(input: Prisma.RoomCreateInput){
-        await prisma.room.create({
+        return await prisma.room.create({
             data: input
         });
     }
