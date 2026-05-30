@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Section {
+  id String @id @default(cuid())
+  name String
+
+  venues Schedule[]
+}
+
+model Teacher {
+  id String @id @default(cuid())
+  firstName String
+  middleName String?
+  lastName String
+
+  schedules Schedule[]
+}
+
+enum ScheduleStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+}
+
+model Schedule {
+  id String @id @default(cuid())
+  name String
+
+  sectionId String
+  section Section @relation(fields: [sectionId], references: [id])
+
+  teacherId String
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  roomId String
+  room Room @relation(fields: [roomId], references: [id])
+
+  start DateTime?
+  end DateTime?
+
+  status ScheduleStatus @default(DRAFT)
+}
+
+enum RoomStatus {
+  INCOMING
+  ACTIVE
+  INACTIVE
+}
+
+model Room {
+  id String @id @default(cuid())
+  name String
+  status RoomStatus
+
+  schedules Schedule[]
+}
