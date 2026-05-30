@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProgramStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ProgramEnrollmentStatus {
+  DRAFT
+  ONGOING
+  PASSED
+  FAILED
+  DROPPED
+}
+
+enum CourseStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum CourseEnrollmentStatus {
+  DRAFT
+  ONGOING
+  PASSED
+  FAILED
+  DROPPED
+}
+
+model Student {
+  id String @id @default(cuid())
+  firstName String
+  middleName String
+  lastName String
+
+  programEnrollments ProgramEnrollment[]
+  courseEnrollments CourseEnrollment[]
+}
+
+model Teacher {
+  id String @id @default(cuid())
+  firstName String
+  middleName String
+  lastName String
+
+  courseEnrollmentsAsTeacher CourseEnrollment[]
+}
+
+model Program{
+  id String @id @default(cuid())
+  name String
+  status ProgramStatus @default(INACTIVE)
+
+  maxResidency Int
+  retentionGrade Float
+
+  programEnrollments ProgramEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProgramEnrollment {
+  id String @id @default(cuid())
+  currentResidency Int
+
+  studentId String
+  student Student @relation(fields: [studentId], references: [id])
+
+  programId String
+  program Program @relation(fields: [programId], references: [id])
+
+  status ProgramStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id String @id @default(cuid())
+  name String
+  status CourseStatus @default(INACTIVE)
+
+  courseEnrollments CourseEnrollment[]
+}
+
+model CourseEnrollment {
+  id String @id @default(cuid())
+
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+
+  studentId String
+  student Student @relation(fields: [studentId], references: [id])
+
+  teacherId String
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+  
+  status CourseEnrollmentStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
