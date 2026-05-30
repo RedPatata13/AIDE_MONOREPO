@@ -10,6 +10,8 @@ This repository contains:
 - Deployment configurations
 
 ---
+Note: Some Service directory structuring may be different than others due to developer experimenting between different directory arrangements.
+---
 
 # Repository Structure
 
@@ -29,6 +31,10 @@ This repository contains:
 |---|---|
 | school-year-service | In active development |
 | course -service | In active development |
+| program-service | In active development |
+| venue-service | In active development |
+| identity-service | In active development |
+| enrollment-service | In active development |
 | other services | Planned / scaffolded |
 
 ---
