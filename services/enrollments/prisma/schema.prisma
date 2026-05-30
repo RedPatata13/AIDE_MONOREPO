@@ -55,7 +55,7 @@ model Teacher {
   middleName String
   lastName String
 
-  courseEnrollmentsAsTeacher CourseEnrollment[]
+  assignedCourses AssignedCourse[]
 }
 
 model Program{
@@ -74,6 +74,7 @@ model Program{
 
 model ProgramEnrollment {
   id String @id @default(cuid())
+  
   currentResidency Int
 
   studentId String
@@ -93,20 +94,32 @@ model Course {
   name String
   status CourseStatus @default(INACTIVE)
 
+  assignedCourses AssignedCourse[]
+}
+
+model AssignedCourse {
+  id String @id @default(cuid())
+
+  teacherId String
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  courseId String
+  course Course @relation(fields: [courseId], references: [id])
+
   courseEnrollments CourseEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CourseEnrollment {
   id String @id @default(cuid())
 
-  course_id String
-  course Course @relation(fields: [course_id], references: [id])
+  assignedCourseId String
+  assignedCourse AssignedCourse @relation(fields: [assignedCourseId], references: [id])
 
   studentId String
   student Student @relation(fields: [studentId], references: [id])
-
-  teacherId String
-  teacher Teacher @relation(fields: [teacherId], references: [id])
   
   status CourseEnrollmentStatus @default(DRAFT)
 
