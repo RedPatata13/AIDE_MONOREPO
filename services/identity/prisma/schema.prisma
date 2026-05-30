@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum IdentityType {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum IdentityStatus {
+  ACTIVATED
+  DEACTIVATED
+  ARCHIVED
+}
+
+model Identity {
+  id String @id @default(cuid())
+  cognitoSub String @unique
+  cognitoUsername String? @unique
+  email String @unique
+  type IdentityType
+  status IdentityStatus @default(ACTIVATED)
+  student Student?
+  teacher Teacher?
+  admin Admin?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id String @id @default(cuid())
+  identity Identity @relation(fields: [id], references: [id])
+  firstName String
+  middleName String?
+  lastName String
+  contactNo String?
+  guardianName String?
+  guardianContactNo String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Teacher {
+  id String @id @default(cuid())
+  identity Identity @relation(fields: [id], references: [id])
+  firstName String
+  middleName String?
+  lastName String
+  contactNo String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id String @id @default(cuid())
+  identity Identity @relation(fields: [id], references: [id])
+  firstName String
+  middleName String?
+  lastName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
